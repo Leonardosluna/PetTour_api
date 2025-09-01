@@ -23,22 +23,21 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Usuario implements UserDetails { // <-- IMPLEMENTAR UserDetails
+public class Usuario implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String nome;
-    
     private String email;
-    
     private String senha;
-
+    private String telefone;
+    private String fotoUrl;
+    
     // MÉTODOS DA INTERFACE UserDetails
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // Por enquanto, vamos retornar uma role padrão para todo usuário
         return List.of(new SimpleGrantedAuthority("ROLE_USER"));
     }
 
@@ -52,7 +51,6 @@ public class Usuario implements UserDetails { // <-- IMPLEMENTAR UserDetails
         return this.email;
     }
 
-    // Para simplificar, vamos retornar 'true' para os métodos abaixo
     @Override
     public boolean isAccountNonExpired() {
         return true;

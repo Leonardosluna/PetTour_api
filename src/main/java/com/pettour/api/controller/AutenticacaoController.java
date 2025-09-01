@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
+
 import com.pettour.api.dto.LoginRequestDTO;
 import com.pettour.api.dto.TokenResponseDTO;
 import com.pettour.api.dto.UsuarioDTO;
@@ -30,7 +32,7 @@ public class AutenticacaoController {
     private TokenService tokenService;
 
     @PostMapping("/registrar")
-    public ResponseEntity<Usuario> registrar(@RequestBody UsuarioDTO dados) {
+    public ResponseEntity<Usuario> registrar(@Valid @RequestBody UsuarioDTO dados) {
         Usuario novoUsuario = new Usuario();
         novoUsuario.setNome(dados.getNome());
         novoUsuario.setEmail(dados.getEmail());
