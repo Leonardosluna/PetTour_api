@@ -1,3 +1,7 @@
+# Arquivos de Banco de Dados H2
+*.mv.db
+*.trace.db
+
 HELP.md
 target/
 .mvn/wrapper/maven-wrapper.jar
