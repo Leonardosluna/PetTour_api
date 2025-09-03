@@ -20,31 +20,29 @@ import com.pettour.api.security.JwtTokenFilter; // Importar a classe do filtro
 public class SecurityConfig {
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtTokenFilter jwtTokenFilter) throws Exception {
-        return http
-                // Desabilita a proteção CSRF
-                .csrf(csrf -> csrf.disable())
-
-                // Configura os headers para permitir o uso do console do H2
-                .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()))
-                
-                // Configura a gestão de sessão para ser stateless
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                
-                // Configura as regras de autorização para os endpoints HTTP
-                .authorizeHttpRequests(authorize -> authorize
-                        // Permite acesso público
-                        .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/h2-console/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/servicos").permitAll()
-                        
-                        // Exige autenticação para qualquer outra requisição
-                        .anyRequest().authenticated() 
-                )
-                // Adiciona o nosso filtro (gerenciado pelo Spring) antes do filtro padrão
-                .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class)
-                .build();
-    }
+public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtTokenFilter jwtTokenFilter) throws Exception {
+    return http
+            .csrf(csrf -> csrf.disable())
+            .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()))
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(authorize -> authorize
+                    // --- REGRAS PÚBLICAS (Qualquer um pode acessar) ---
+                    .requestMatchers("/auth/**").permitAll()
+                    .requestMatchers("/h2-console/**").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/servicos").permitAll()
+                    
+                    // --- REGRAS DE ADMIN (Apenas quem tem a ROLE_ADMIN) ---
+                    .requestMatchers(HttpMethod.POST, "/servicos").hasRole("ADMIN") 
+                    .requestMatchers(HttpMethod.PUT, "/servicos/**").hasRole("ADMIN") 
+                    .requestMatchers(HttpMethod.DELETE, "/servicos/**").hasRole("ADMIN") 
+                    .requestMatchers(HttpMethod.PATCH, "/agendamentos/{id}/concluir").hasRole("ADMIN")
+                    
+                    // --- REGRAS DE USUÁRIO LOGADO (Qualquer usuário autenticado) ---
+                    .anyRequest().authenticated() 
+            )
+            .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class)
+            .build();
+}
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {

@@ -3,11 +3,15 @@ package com.pettour.api.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+
+import jakarta.transaction.Transactional;
 
 import com.pettour.api.dto.PerfilDTO;
 import com.pettour.api.dto.PerfilUpdateDTO;
@@ -51,5 +55,13 @@ public class UsuarioController {
         PerfilDTO perfil = new PerfilDTO(usuarioAtualizado);
 
         return ResponseEntity.ok(perfil);
+    }
+
+    @DeleteMapping
+    @Transactional
+    public ResponseEntity<Void> deletarPerfil(Authentication authentication) {
+        Usuario usuarioLogado = (Usuario) authentication.getPrincipal();
+        usuarioRepository.delete(usuarioLogado);
+        return ResponseEntity.noContent().build();
     }
 }

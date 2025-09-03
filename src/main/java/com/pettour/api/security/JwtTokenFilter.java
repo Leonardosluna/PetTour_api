@@ -44,6 +44,10 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                     var authentication = new UsernamePasswordAuthenticationToken(usuario, null, usuario.getAuthorities());
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                     System.out.println("[FILTRO JWT] - SUCESSO: Usuário autenticado e adicionado ao contexto de segurança.");
+                    
+                    // --- LINHA DE DIAGNÓSTICO ADICIONADA AQUI ---
+                    System.out.println("[FILTRO JWT] - DETALHES AUTENTICAÇÃO: Usuário: " + usuario.getUsername() + " | Papéis: " + usuario.getAuthorities());
+
                 } else {
                     System.out.println("[FILTRO JWT] - ERRO: Usuário com email '" + subject + "' não encontrado no banco de dados.");
                 }
@@ -52,7 +56,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                 System.out.println("[FILTRO JWT] - ERRO: Token JWT inválido ou expirado! Mensagem: " + e.getMessage());
             }
         } else {
-            System.out.println("[FILTRO JWT] - Nenhum token JWT encontrado no cabeçalho 'Authorization'. Acesso será negado.");
+            System.out.println("[FILTRO JWT] - Nenhum token JWT encontrado no cabeçalho 'Authorization'.");
         }
 
         filterChain.doFilter(request, response);
