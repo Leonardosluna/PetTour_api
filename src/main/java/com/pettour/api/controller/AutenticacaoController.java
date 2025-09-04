@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.pettour.api.dto.LoginRequestDTO;
-import com.pettour.api.dto.TokenResponseDTO;
+import com.pettour.api.dto.LoginResponseDTO;
 import com.pettour.api.dto.UsuarioDTO;
 import com.pettour.api.model.Usuario;
 import com.pettour.api.service.TokenService;
@@ -41,11 +41,16 @@ public class AutenticacaoController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<TokenResponseDTO> login(@RequestBody LoginRequestDTO dados) {
+    public ResponseEntity<LoginResponseDTO> login(@RequestBody LoginRequestDTO dados) {
         var authenticationToken = new UsernamePasswordAuthenticationToken(dados.getEmail(), dados.getSenha());
         var authentication = authenticationManager.authenticate(authenticationToken);
+        
         var usuario = (Usuario) authentication.getPrincipal();
         var tokenJWT = tokenService.gerarToken(usuario);
-        return ResponseEntity.ok(new TokenResponseDTO(tokenJWT));
+
+        // Cria o novo DTO de resposta com o token e os dados do usuário
+        var responseDTO = new LoginResponseDTO(tokenJWT, usuario);
+
+        return ResponseEntity.ok(responseDTO);
     }
 }

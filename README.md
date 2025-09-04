@@ -4,182 +4,137 @@ API RESTful desenvolvida em Java com Spring Boot para o backend do aplicativo Pe
 
 ## 📜 Descrição
 
-Este projeto é o backend responsável por toda a regra de negócio, segurança e persistência de dados do sistema PetTour. 
-Ele fornece endpoints para gerenciamento de usuários, autenticação, perfis e um CRUD completo para os serviços oferecidos.
+Este projeto é o backend responsável por toda a regra de negócio, segurança e persistência de dados do sistema PetTour. Ele fornece uma API robusta para gerenciamento de usuários, perfis, pets, serviços e agendamentos, com um sistema de autenticação seguro baseado em JWT e controle de acesso por papéis (Roles).
 
 ## ✨ Funcionalidades
 
 * **Autenticação Segura:** Sistema de registro e login com senhas criptografadas e autenticação via JSON Web Tokens (JWT).
-* **Gerenciamento de Serviços:** CRUD completo (Criar, Ler, Atualizar, Deletar) para os serviços do catálogo.
-* **Gerenciamento de Perfis:** Usuários autenticados podem visualizar e atualizar suas próprias informações de perfil.
-* **Validação de Dados:** Proteção contra dados de entrada inválidos (ex: emails mal formatados, campos em branco).
-* **Tratamento de Erros:** Respostas de erro padronizadas e claras para o cliente.
+* **Segurança Baseada em Papéis (Roles):** Distinção entre usuários comuns (`ROLE_USER`) e administradores (`ROLE_ADMIN`), com permissões específicas para cada um.
+* **Gerenciamento de Perfis:** Usuários podem visualizar, atualizar e **deletar** as suas próprias contas.
+* **Gerenciamento de Pets:** Usuários logados podem cadastrar, visualizar, atualizar e deletar os seus próprios pets.
+* **CRUD de Serviços:** Administradores têm controle total sobre o catálogo de serviços.
+* **Sistema de Agendamento:** Usuários podem agendar serviços para os seus pets, com validação de regras de negócio como prevenção de agendamentos duplos no mesmo horário.
+* **Validação de Dados:** Proteção contra dados de entrada inválidos (ex: emails mal formatados, agendamentos no passado).
+* **Tratamento de Erros:** Respostas de erro padronizadas e claras para o cliente (`400`, `403`, `404`, `409`).
 
 ## 🛠️ Tecnologias Utilizadas
 
 * **Java 17**
 * **Spring Boot 3**
-* **Spring Security:** Para segurança e JWT.
-* **Spring Data JPA / Hibernate:** Para persistência de dados.
-* **H2 Database:** Banco de dados em memória/arquivo para ambiente de desenvolvimento.
-* **Maven:** Gerenciador de dependências e build.
-* **Lombok:** Para redução de código boilerplate.
-* **Jakarta Bean Validation:** Para validação dos dados de entrada.
-* **java-jwt (Auth0):** Para geração e validação de tokens JWT.
+* **Spring Security**
+* **Spring Data JPA / Hibernate**
+* **H2 Database** (para desenvolvimento)
+* **Maven**
+* **Lombok**
+* **Jakarta Bean Validation**
+* **java-jwt (Auth0)**
 
 ## 🚀 Como Executar o Projeto
 
-Siga os passos abaixo para executar a API localmente.
-
 ### Pré-requisitos
-
 * **JDK 17** ou superior.
 * **Maven 3.8** ou superior.
 
 ### Passos para Execução
-
-1.  **Clone o repositório:**
-    ```bash
-    git clone [URL_DO_SEU_REPOSITORIO]
-    cd [NOME_DA_PASTA_DO_PROJETO]
-    ```
-
-2.  **Compile e execute o projeto usando o Maven Wrapper:**
-    * No Windows:
-      ```bash
-      ./mvnw spring-boot:run
-      ```
-    * No Linux ou macOS:
-      ```bash
-      ./mvnw spring-boot:run
-      ```
-
-3.  A API estará rodando em `http://localhost:8080`.
+1.  Clone o repositório.
+2.  Navegue até a pasta raiz do projeto.
+3.  Execute o comando: `./mvnw spring-boot:run`
+4.  A API estará rodando em `http://localhost:8080`.
 
 ### Acessando o Banco de Dados H2
+* Com a aplicação rodando, acesse `http://localhost:8080/h2-console`.
+* **JDBC URL:** `jdbc:h2:file:./pettourdb`
+* **User Name:** `sa`
+* **Password:** `password`
 
-* Com a aplicação rodando, acesse `http://localhost:8080/h2-console` no seu navegador.
-* Use as seguintes credenciais para conectar:
-    * **JDBC URL:** `jdbc:h2:file:./pettourdb`
-    * **User Name:** `sa`
-    * **Password:** `password`
+## 📖 Endpoints da API
 
-## ⚙️ Configuração
-
-As configurações principais podem ser encontradas no arquivo `src/main/resources/application.properties`. 
-A configuração mais importante é a chave secreta para a assinatura dos tokens JWT:
-
-```properties
-# Chave secreta para JWT
-api.jwt.secret=SuaChaveSuperSecretaAqui
-```
-
-## Endpoints da API
-
-A seguir, a documentação dos endpoints disponíveis na API.
+> **Nota:** Todos os endpoints marcados como **Protegido** requerem um token JWT válido no cabeçalho `Authorization: Bearer <token>`.
 
 ---
 
 ### Autenticação (`/auth`)
 
 #### `POST /auth/registrar`
-Registra um novo usuário no sistema.
+Registra um novo usuário com o papel padrão `ROLE_USER`.
 * **Protegido:** Não
-* **Corpo da Requisição (JSON):**
-    ```json
-    {
-        "nome": "Leo",
-        "email": "leo@email.com",
-        "senha": "senha123"
-    }
-    ```
-* **Resposta de Sucesso (200 OK):** O objeto do usuário criado (com a senha criptografada).
 
 #### `POST /auth/login`
 Autentica um usuário e retorna um token JWT.
 * **Protegido:** Não
-* **Corpo da Requisição (JSON):**
-    ```json
-    {
-        "email": "leo@email.com",
-        "senha": "senha123"
-    }
-    ```
-* **Resposta de Sucesso (200 OK):**
-    ```json
-    {
-        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-    }
-    ```
 
 ---
 
 ### Perfil do Usuário (`/perfil`)
 
-> **Nota:** Todos os endpoints de perfil requerem um token JWT no cabeçalho `Authorization: Bearer <token>`.
-
 #### `GET /perfil`
-Retorna as informações do perfil do usuário atualmente logado.
-* **Protegido:** Sim
-* **Resposta de Sucesso (200 OK):**
-    ```json
-    {
-        "id": 1,
-        "nome": "Leo",
-        "email": "leo@email.com",
-        "telefone": "21999998888",
-        "fotoUrl": "[http://example.com/foto.jpg](http://example.com/foto.jpg)"
-    }
-    ```
+Retorna as informações do perfil do usuário logado.
+* **Protegido:** Sim (`USER` ou `ADMIN`)
 
 #### `PUT /perfil`
 Atualiza as informações do perfil do usuário logado.
-* **Protegido:** Sim
-* **Corpo da Requisição (JSON):**
-    ```json
-    {
-        "nome": "Leo Atualizado",
-        "telefone": "21987654321",
-        "fotoUrl": "[http://example.com/nova-foto.jpg](http://example.com/nova-foto.jpg)"
-    }
-    ```
-* **Resposta de Sucesso (200 OK):** O objeto do perfil já com os dados atualizados.
+* **Protegido:** Sim (`USER` ou `ADMIN`)
+
+#### `DELETE /perfil`
+Deleta a conta do usuário logado e todos os seus dados associados (pets, agendamentos).
+* **Protegido:** Sim (`USER` ou `ADMIN`)
+
+---
+
+### Pets do Usuário (`/perfil/pets`)
+
+#### `POST /perfil/pets`
+Cadastra um novo pet para o usuário logado.
+* **Protegido:** Sim (`USER` ou `ADMIN`)
+
+#### `GET /perfil/pets`
+Lista todos os pets do usuário logado.
+* **Protegido:** Sim (`USER` ou `ADMIN`)
+
+#### `PUT /perfil/pets/{id}`
+Atualiza um pet específico. A API valida se o pet pertence ao usuário logado.
+* **Protegido:** Sim (`USER` ou `ADMIN`)
+
+#### `DELETE /perfil/pets/{id}`
+Deleta um pet específico. A API valida se o pet pertence ao usuário logado.
+* **Protegido:** Sim (`USER` ou `ADMIN`)
 
 ---
 
 ### Serviços (`/servicos`)
 
 #### `GET /servicos`
-Lista todos os serviços cadastrados.
+Lista todos os serviços disponíveis no catálogo.
 * **Protegido:** Não
-* **Resposta de Sucesso (200 OK):** Uma lista de objetos de serviço.
 
-#### `POST /servicos`
-Cadastra um novo serviço.
-* **Protegido:** Sim (Requer token JWT)
-* **Corpo da Requisição (JSON):**
-    ```json
-    {
-        "nome": "Banho e Tosa",
-        "descricao": "Banho completo com produtos antialérgicos.",
-        "preco": 89.90,
-        "contato": "contato@petshop.com"
-    }
-    ```
-* **Resposta de Sucesso (200 OK):** O objeto do serviço criado, com seu novo `id`.
+#### `POST /servicos`, `PUT /servicos/{id}`, `DELETE /servicos/{id}`
+Cria, atualiza ou deleta um serviço.
+* **Protegido:** Sim (**Apenas `ADMIN`**)
 
-#### `GET /servicos/{id}`
-Busca um serviço específico pelo seu ID.
-* **Protegido:** Sim (Requer token JWT)
-* **Resposta de Sucesso (200 OK):** O objeto do serviço encontrado.
+---
 
-#### `PUT /servicos/{id}`
-Atualiza um serviço existente pelo seu ID.
-* **Protegido:** Sim (Requer token JWT)
-* **Corpo da Requisição (JSON):** Similar ao do `POST`.
-* **Resposta de Sucesso (200 OK):** O objeto do serviço atualizado.
+### Agendamentos (`/agendamentos`)
 
-#### `DELETE /servicos/{id}`
-Deleta um serviço pelo seu ID.
-* **Protegido:** Sim (Requer token JWT)
-* **Resposta de Sucesso (204 No Content):** Resposta vazia, indicando sucesso.
+#### `POST /agendamentos`
+Cria um novo agendamento para um pet do usuário logado. A API valida se o horário está disponível.
+* **Protegido:** Sim (`USER` ou `ADMIN`)
+
+#### `GET /agendamentos`
+Lista todos os agendamentos feitos pelo usuário logado.
+* **Protegido:** Sim (`USER` ou `ADMIN`)
+
+#### `PATCH /agendamentos/{id}/cancelar`
+Muda o status de um agendamento para `CANCELADO`. A API valida se o agendamento pertence ao usuário logado.
+* **Protegido:** Sim (`USER` ou `ADMIN`)
+
+#### `PATCH /agendamentos/{id}/concluir`
+Muda o status de um agendamento para `CONCLUIDO`.
+* **Protegido:** Sim (**Apenas `ADMIN`**)
+
+#### `GET /agendamentos/horarios-disponiveis`
+Retorna uma lista de horários disponíveis para uma data específica.
+* **Endpoint:** `/agendamentos/horarios-disponiveis?data=AAAA-MM-DD`
+* **Protegido:** Sim (`USER` ou `ADMIN`)
+
+
+
